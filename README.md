@@ -4,7 +4,7 @@
 * lsusb from the usbutils package of your distro
 
 # Usage
-```shell
+```
 usage: libvirt-helper.py [-h] [-l] [-u] [-a] [-d] [DOMAIN] [USB_ID1,USB_ID2]
 
 positional arguments:
@@ -33,4 +33,9 @@ libvirt-helper.py -a win11
 Attach multiple USB device to a domain named `win11`
 ```shell
 libvirt-helper.py -a win11 1532:028f,1532:0099,2dc8:3109
+```
+
+Attach using the built-in domain and device picker
+```shell
+libvirt-helper.py -a
 ```
