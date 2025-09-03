@@ -1,0 +1,36 @@
+# Dependencies
+* Python
+* libvirt lib from the libvirt-python package of your distro
+* lsusb from the usbutils package of your distro
+
+# Usage
+```shell
+usage: libvirt-helper.py [-h] [-l] [-u] [-a] [-d] [DOMAIN] [USB_ID1,USB_ID2]
+
+positional arguments:
+  DOMAIN
+  USB_ID1,USB_ID2
+
+options:
+  -h, --help          show this help message and exit
+  -l, --list-domains  list domains - only names for now
+  -u, --list-usb      list usb devices
+  -a, --attach-usb    attach usb device(s)
+  -d, --detach-usb    detach usb device(s)
+```
+
+# Examples
+Attach using `fzf` to pick the domain and the built-in picker for the USB device
+```shell
+libvirt-helper.py -a $(libvirt-helper.py -l | fzf)
+```
+
+Attach a USB device to the domain named `win11` using the built-in device picker
+```shell
+libvirt-helper.py -a win11
+```
+
+Attach multiple USB device to a domain named `win11`
+```shell
+libvirt-helper.py -a win11 1532:028f,1532:0099,2dc8:3109
+```
