@@ -25,12 +25,12 @@ Attach using `fzf` to pick the domain and the built-in picker for the USB device
 libvirt-helper.py -a $(libvirt-helper.py -l | fzf)
 ```
 
-Attach a USB device to the domain named `win11` using the built-in device picker
+Attach a USB device to the domain named win11 using the built-in device picker
 ```shell
 libvirt-helper.py -a win11
 ```
 
-Attach multiple USB device to a domain named `win11`
+Attach multiple USB devices to a domain named win11
 ```shell
 libvirt-helper.py -a win11 1532:028f,1532:0099,2dc8:3109
 ```
@@ -39,3 +39,4 @@ Attach using the built-in domain and device picker
 ```shell
 libvirt-helper.py -a
 ```
+
