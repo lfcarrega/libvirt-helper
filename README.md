@@ -20,6 +20,13 @@ options:
   --udev              create udev rule/auto attach device on plug
 ```
 
+To prevent specific devices (like your mouse or keyboard) from being automatically grabbed by the udev rule, add their IDs to `/etc/libvirt-helper/usb-ignorelist.conf`:
+```
+# /etc/libvirt-helper/usb-ignorelist.conf
+1532:028f
+046d:c52b
+```
+
 # Examples
 Attach using `fzf` to pick the domain and the built-in picker for the USB device
 ```shell
@@ -45,6 +52,7 @@ Attach and detach with an udev rule `/etc/udev/rules.d/99-libvirt-helper.rules`
 ```shell
 SUBSYSTEM=="usb", ACTION=="add|remove", RUN+="/path/to/libvirt-helper.py --udev"
 ```
+
 
 
 
