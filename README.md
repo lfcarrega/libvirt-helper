@@ -33,7 +33,7 @@ Run with sudo or from an elevated shell
 mkdir -p /etc/libvirt-helper
 touch /etc/libvirt-helper/usb-ignorelist.conf 
 echo "SUBSYSTEM==\"usb\", ACTION==\"add|remove\", RUN+=\"/usr/local/bin/libvirt-helper --udev\"" > /etc/udev/rules.d/99-libvirt-helper.rules
-wget "https://github.com/lfcarrega/libvirt-helper/blob/main/libvirt-helper.py" -O /usr/local/bin/libvirt-helper
+wget "https://raw.githubusercontent.com/lfcarrega/libvirt-helper/refs/heads/main/libvirt-helper.py" -O /usr/local/bin/libvirt-helper
 chmod +x /usr/local/bin/libvirt-helper
 ```
 
@@ -62,6 +62,7 @@ Attach and detach with an udev rule `/etc/udev/rules.d/99-libvirt-helper.rules`
 ```shell
 SUBSYSTEM=="usb", ACTION=="add|remove", RUN+="/path/to/libvirt-helper.py --udev"
 ```
+
 
 
 
