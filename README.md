@@ -27,6 +27,16 @@ To prevent specific devices (like your mouse or keyboard) from being automatical
 046d:c52b
 ```
 
+# Installation
+Run with sudo or from an elevated shell
+```shell
+mkdir -p /etc/libvirt-helper
+touch /etc/libvirt-helper/usb-ignorelist.conf 
+echo "SUBSYSTEM==\"usb\", ACTION==\"add|remove\", RUN+=\"/usr/local/bin/libvirt-helper --udev\"" > /etc/udev/rules.d/99-libvirt-helper.rules
+wget "https://github.com/lfcarrega/libvirt-helper/blob/main/libvirt-helper.py" -O /usr/local/bin/libvirt-helper
+chmod +x /usr/local/bin/libvirt-helper
+```
+
 # Examples
 Attach using `fzf` to pick the domain and the built-in picker for the USB device
 ```shell
@@ -52,6 +62,7 @@ Attach and detach with an udev rule `/etc/udev/rules.d/99-libvirt-helper.rules`
 ```shell
 SUBSYSTEM=="usb", ACTION=="add|remove", RUN+="/path/to/libvirt-helper.py --udev"
 ```
+
 
 
 
