@@ -41,4 +41,10 @@ Attach using the built-in domain and device picker
 libvirt-helper.py -a
 ```
 
+Attach and detach with an udev rule `/etc/udev/rules.d/99-libvirt-helper.rules`
+```shell
+SUBSYSTEM=="usb", ACTION=="add|remove", RUN+="/path/to/libvirt-helper.py --udev"
+```
+
+
 
