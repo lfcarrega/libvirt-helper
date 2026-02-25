@@ -30,10 +30,13 @@ def domain_connect(conn=None, domainName=None):
         domainConn = conn.lookupByName(domainName)
         return domainConn
 
-def list_domains(conn=None):
+def list_domains(conn=None, active=None):
     if conn == None:
         conn = libvirt_connect()
-    domainList = conn.listAllDomains()
+    if active:
+        domainList = conn.listAllDomains(libvirt.VIR_CONNECT_LIST_DOMAINS_ACTIVE)
+    else:
+        domainList = conn.listAllDomains()
     domainNameList = []
     for domain in domainList:
         domainNameList.append(domain.name())
@@ -80,7 +83,7 @@ def usb_validate(usb):
         die(f"Missing USB devices to attach!")
     else:
         return validUsbList
-    
+
 def domain_picker():
     if not args.domain or args.domain == "?":
         conn, domainNameList = list_domains()
@@ -120,9 +123,9 @@ def build_xml(vendorID=None, productID=None, isoPath=None):
     if vendorID != None and productID != None:
         root = minidom.Document()
         hostdev = root.createElement('hostdev')
-        hostdev.setAttribute('mode', 'subsystem') 
-        hostdev.setAttribute('type', 'usb') 
-        hostdev.setAttribute('managed', 'yes') 
+        hostdev.setAttribute('mode', 'subsystem')
+        hostdev.setAttribute('type', 'usb')
+        hostdev.setAttribute('managed', 'yes')
         root.appendChild(hostdev)
 
         source = root.createElement('source')
@@ -132,10 +135,10 @@ def build_xml(vendorID=None, productID=None, isoPath=None):
         vendor.setAttribute('id', '0x'+vendorID)
         source.appendChild(vendor)
 
-        product = root.createElement('product')          
-        product.setAttribute('id', '0x'+productID)                
+        product = root.createElement('product')
+        product.setAttribute('id', '0x'+productID)
         source.appendChild(product)
-    
+
         root = root.childNodes[0]
         xml = root.toprettyxml()
     return xml
@@ -145,6 +148,7 @@ parser.add_argument("-l", "--list-domains", help="list domains - only names for 
 parser.add_argument("-u", "--list-usb", help="list usb devices", action="store_true")
 parser.add_argument("-a", "--attach-usb", help="attach usb device(s)", action="store_true")
 parser.add_argument("-d", "--detach-usb", help="detach usb device(s)", action="store_true")
+parser.add_argument("--udev", help="create udev rule/auto attach device on plug", action="store_true")
 parser.add_argument("domain", default=None, nargs="?", type=str, metavar=("DOMAIN"))
 parser.add_argument("usb", default=None, nargs="?", type=str, metavar=("USB_ID1,USB_ID2"))
 args = parser.parse_args()
@@ -153,12 +157,35 @@ if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
 
+if args.udev:
+    ignoreList="/etc/libvirt-helper/usb-ignorelist.conf"
+    ignore=False
+    if not args.domain:
+        conn, domainNameList = list_domains(active=True)
+        domain = domainNameList[0]
+    domainConn = domain_connect(domainName=domain)
+    if os.environ.get('PRODUCT'):
+        product_list = os.environ.get('PRODUCT').split("/")
+        vendorId = product_list[0].rjust(4, "0")
+        productId = product_list[1].rjust(4, "0")
+        usbId = f"{vendorId}:{productId}"
+    xml = build_xml(vendorID=vendorId, productID=productId)
+    if os.path.exists(ignoreList):
+        with open(ignoreList, "r") as file:
+            for line in file:
+                if line.strip() == usbId:
+                    ignore=True
+    if os.environ.get('ACTION') == "add" and not ignore:
+        domainConn.attachDeviceFlags(xml, libvirt.VIR_DOMAIN_AFFECT_CURRENT)
+    if os.environ.get('ACTION') == "remove" and not ignore:
+        domainConn.detachDeviceFlags(xml, libvirt.VIR_DOMAIN_AFFECT_CURRENT)
+
 if args.attach_usb or args.detach_usb:
     conn, domain = domain_picker()
     domainConn = domain_connect(conn=conn, domainName=domain)
     usb = usb_picker()
-    print(f"Here's your domain: {domain}")
-    print(f"Here's your usb devices: {usb}")
+    print(f"Domain: {domain}")
+    print(f"USB devices: {usb}")
     validDev = []
     invalidDev = []
     if domain != None and usb != None:
@@ -168,10 +195,13 @@ if args.attach_usb or args.detach_usb:
             productId = devId[1]
             xml = build_xml(vendorID=vendorId, productID=productId)
             try:
-                if args.attach_usb:
+                if args.attach_usb and not args.detach_usb:
                     domainConn.attachDeviceFlags(xml, libvirt.VIR_DOMAIN_AFFECT_CURRENT)
-                if args.detach_usb:
+                if args.detach_usb and not args.attach_usb:
                     domainConn.detachDeviceFlags(xml, libvirt.VIR_DOMAIN_AFFECT_CURRENT)
+                if args.attach_usb and args.detach_usb:
+                    domainConn.detachDeviceFlags(xml, libvirt.VIR_DOMAIN_AFFECT_CURRENT)
+                    domainConn.attachDeviceFlags(xml, libvirt.VIR_DOMAIN_AFFECT_CURRENT)
             except libvirt.libvirtError as err:
                 msg = err.get_error_message()
                 if msg.find("domain is not running") > -1:
@@ -180,16 +210,21 @@ if args.attach_usb or args.detach_usb:
                     invalidDev.append(dev)
             else:
                 validDev.append(dev)
-    if args.attach_usb:
+    if args.attach_usb and not args.detach_usb:
         if len(validDev) > 0:
             print(f"Attached devices: {validDev}")
         if len(invalidDev) > 0:
             print(f"Failed to attach these devices: {invalidDev}")
-    if args.detach_usb:
+    if args.detach_usb and not args.attach_usb:
         if len(validDev) > 0:
             print(f"Detached devices: {validDev}")
         if len(invalidDev) > 0:
             print(f"Failed to detach these devices: {invalidDev}")
+    if args.attach_usb and args.detach_usb:
+        if len(validDev) > 0:
+            print(f"Reattached devices: {validDev}")
+        if len(invalidDev) > 0:
+            print(f"Failed to reattach these devices: {invalidDev}")
     sys.exit(0)
 
 if args.list_domains:
