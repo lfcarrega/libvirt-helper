@@ -148,7 +148,7 @@ parser.add_argument("-l", "--list-domains", help="list domains - only names for 
 parser.add_argument("-u", "--list-usb", help="list usb devices", action="store_true")
 parser.add_argument("-a", "--attach-usb", help="attach usb device(s)", action="store_true")
 parser.add_argument("-d", "--detach-usb", help="detach usb device(s)", action="store_true")
-parser.add_argument("--udev", help="create udev rule/auto attach device on plug", action="store_true")
+parser.add_argument("--udev", help="auto attach with an udev rule ", action="store_true")
 parser.add_argument("domain", default=None, nargs="?", type=str, metavar=("DOMAIN"))
 parser.add_argument("usb", default=None, nargs="?", type=str, metavar=("USB_ID1,USB_ID2"))
 args = parser.parse_args()
