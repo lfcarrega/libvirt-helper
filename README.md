@@ -5,7 +5,7 @@
 
 # Usage
 ```
-usage: libvirt-helper.py [-h] [-l] [-u] [-a] [-d] [DOMAIN] [USB_ID1,USB_ID2]
+usage: libvirt-helper.py [-h] [-l] [-u] [-a] [-d] [--udev] [DOMAIN] [USB_ID1,USB_ID2]
 
 positional arguments:
   DOMAIN
@@ -17,6 +17,7 @@ options:
   -u, --list-usb      list usb devices
   -a, --attach-usb    attach usb device(s)
   -d, --detach-usb    detach usb device(s)
+  --udev              create udev rule/auto attach device on plug
 ```
 
 # Examples
@@ -39,4 +40,5 @@ Attach using the built-in domain and device picker
 ```shell
 libvirt-helper.py -a
 ```
+
 
