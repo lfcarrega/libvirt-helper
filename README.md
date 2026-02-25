@@ -17,7 +17,7 @@ options:
   -u, --list-usb      list usb devices
   -a, --attach-usb    attach usb device(s)
   -d, --detach-usb    detach usb device(s)
-  --udev              create udev rule/auto attach device on plug
+  --udev              auto attach with an udev rule 
 ```
 
 To prevent specific devices (like your mouse or keyboard) from being automatically grabbed by the udev rule, add their IDs to `/etc/libvirt-helper/usb-ignorelist.conf`:
@@ -52,6 +52,7 @@ Attach and detach with an udev rule `/etc/udev/rules.d/99-libvirt-helper.rules`
 ```shell
 SUBSYSTEM=="usb", ACTION=="add|remove", RUN+="/path/to/libvirt-helper.py --udev"
 ```
+
 
 
 
